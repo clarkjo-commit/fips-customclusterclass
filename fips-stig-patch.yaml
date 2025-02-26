@@ -1,0 +1,62 @@
+- definitions:
+    - jsonPatches:
+        - op: add
+          path: /spec/template/spec/kubeadmConfigSpec/preKubeadmCommands/-
+          value: echo '"You are accessing a U.S. Government (USG) Information System (IS) that is provided for USG-authorized use only. By using this IS (which includes any device attached to this IS), you consent to the following conditions:-The USG routinely intercepts and monitors communications on this IS for purposes including, but not limited to, penetration testing, COMSEC monitoring, network operations and defense, personnel misconduct (PM), law enforcement (LE), and counterintelligence (CI) investigations.-At any time, the USG may inspect and seize data stored on this IS.-Communications using, or data stored on, this IS are not private, are subject to routine monitoring, interception, and search, and may be disclosed or used for any USG-authorized purpose.-This IS includes security measures (e.g., authentication and access controls) to protect USG interests--not for your personal benefit or privacy.-Notwithstanding the above, using this IS does not constitute consent to PM, LE or CI investigative searching or monitoring of the content of privileged communications, or work product, related to personal representation or services by attorneys, psychotherapists, or clergy, and their assistants. Such communications and work product are private and confidential. See User Agreement for details."' > /etc/issue
+        - op: add
+          path: /spec/template/spec/kubeadmConfigSpec/preKubeadmCommands/-
+          value: echo 'Banner /etc/issue' >> /etc/ssh/sshd_config
+        - op: add
+          path: /spec/template/spec/kubeadmConfigSpec/preKubeadmCommands/-
+          value: echo 'Ciphers aes256-ctr,aes192-ctr,aes128-ctr' >> /etc/ssh/sshd_config
+        - op: add
+          path: /spec/template/spec/kubeadmConfigSpec/preKubeadmCommands/-
+          value: echo 'MACs hmac-sha2-512,hmac-sha2-256' >> /etc/ssh/sshd_config
+        - op: add
+          path: /spec/template/spec/kubeadmConfigSpec/preKubeadmCommands/-
+          value: sudo systemctl restart sshd
+        - op: add
+          path: /spec/template/spec/kubeadmConfigSpec/preKubeadmCommands/-
+          value: sudo sed -i '/linux/s/$/ fips=1/' /boot/grub2/grub.cfg
+        - op: add
+          path: /spec/template/spec/kubeadmConfigSpec/postKubeadmCommands/-
+          value: sysctl crypto.fips_enabled | grep -q '1$' || sudo init 6
+      selector:
+        apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+        kind: KubeadmControlPlaneTemplate
+        matchResources:
+          controlPlane: true
+  # Enable controls PHTN-30-000003, PHTN-30-000064, PHTN-30-000240 and PHTN-30-000239
+    name: controlPlanePreKubeadmCommandsEnableSecurityControls
+  - definitions:
+      - jsonPatches:
+          - op: add
+            path: /spec/template/spec/preKubeadmCommands/-
+            value: echo '"You are accessing a U.S. Government (USG) Information System (IS) that is provided for USG-authorized use only. By using this IS (which includes any device attached to this IS), you consent to the following conditions:-The USG routinely intercepts and monitors communications on this IS for purposes including, but not limited to, penetration testing, COMSEC monitoring, network operations and defense, personnel misconduct (PM), law enforcement (LE), and counterintelligence (CI) investigations.-At any time, the USG may inspect and seize data stored on this IS.-Communications using, or data stored on, this IS are not private, are subject to routine monitoring, interception, and search, and may be disclosed or used for any USG-authorized purpose.-This IS includes security measures (e.g., authentication and access controls) to protect USG interests--not for your personal benefit or privacy.-Notwithstanding the above, using this IS does not constitute consent to PM, LE or CI investigative searching or monitoring of the content of privileged communications, or work product, related to personal representation or services by attorneys, psychotherapists, or clergy, and their assistants. Such communications and work product are private and confidential. See User Agreement for details."' > /etc/issue
+          - op: add
+            path: /spec/template/spec/preKubeadmCommands/-
+            value: echo 'Banner /etc/issue' >> /etc/ssh/sshd_config
+          - op: add
+            path: /spec/template/spec/preKubeadmCommands/-
+            value: echo 'Ciphers aes256-ctr,aes192-ctr,aes128-ctr' >> /etc/ssh/sshd_config
+          - op: add
+            path: /spec/template/spec/preKubeadmCommands/-
+            value: echo 'MACs hmac-sha2-512,hmac-sha2-256' >> /etc/ssh/sshd_config
+          - op: add
+            path: /spec/template/spec/preKubeadmCommands/-
+            value: sudo systemctl restart sshd
+          - op: add
+            path: /spec/template/spec/preKubeadmCommands/-
+            value: sudo sed -i '/linux/s/$/ fips=1/' /boot/grub2/grub.cfg
+          - op: add
+            path: /spec/template/spec/postKubeadmCommands/-
+            value: sysctl crypto.fips_enabled | grep -q '1$' || sudo init 6
+        selector:
+          apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+          kind: KubeadmConfigTemplate
+          matchResources:
+            machineDeploymentClass:
+              names:
+                - tkg-worker
+    # Enable controls PHTN-30-000003, PHTN-30-000064, PHTN-30-000240 and PHTN-30-000239
+    name: nodePoolPreKubeadmCommandsEnableSecurityControls
